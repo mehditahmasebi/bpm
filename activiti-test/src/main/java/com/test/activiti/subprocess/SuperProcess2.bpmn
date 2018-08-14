@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://www.activiti.org/test">
+  <process id="superProcess" name="Super process" isExecutable="true">
+    <startEvent id="startevent1" name="Start"></startEvent>
+    <endEvent id="endevent1" name="End"></endEvent>
+    <callActivity id="callactivity1" name="Call activity" calledElement="subProcess">
+      <extensionElements>
+        <activiti:in source="var1" target="subvar1"></activiti:in>
+      </extensionElements>
+    </callActivity>
+    <sequenceFlow id="flow1" sourceRef="startevent1" targetRef="initialTask"></sequenceFlow>
+    <sequenceFlow id="flow2" sourceRef="callactivity1" targetRef="endevent1"></sequenceFlow>
+    <dataObject id="var1" name="The First Variable" itemSubjectRef="xsd:string">
+      <extensionElements>
+        <activiti:value>Hello First Variable</activiti:value>
+      </extensionElements>
+    </dataObject>
+    <serviceTask id="initialTask" name="Initial Task" activiti:class="com.test.activiti.subprocess.InitialTask"></serviceTask>
+    <sequenceFlow id="flow3" sourceRef="initialTask" targetRef="callactivity1"></sequenceFlow>
+    <textAnnotation id="textannotation1">
+      <text>Work Fine</text>
+    </textAnnotation>
+    <association id="association1" sourceRef="textannotation1" targetRef="callactivity1"></association>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_superProcess">
+    <bpmndi:BPMNPlane bpmnElement="superProcess" id="BPMNPlane_superProcess">
+      <bpmndi:BPMNShape bpmnElement="startevent1" id="BPMNShape_startevent1">
+        <omgdc:Bounds height="35.0" width="35.0" x="240.0" y="225.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="endevent1" id="BPMNShape_endevent1">
+        <omgdc:Bounds height="35.0" width="35.0" x="640.0" y="225.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="callactivity1" id="BPMNShape_callactivity1">
+        <omgdc:Bounds height="55.0" width="105.0" x="490.0" y="215.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="initialTask" id="BPMNShape_initialTask">
+        <omgdc:Bounds height="55.0" width="105.0" x="320.0" y="215.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="textannotation1" id="BPMNShape_textannotation1">
+        <omgdc:Bounds height="50.0" width="100.0" x="493.0" y="110.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="flow1" id="BPMNEdge_flow1">
+        <omgdi:waypoint x="275.0" y="242.0"></omgdi:waypoint>
+        <omgdi:waypoint x="320.0" y="242.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow2" id="BPMNEdge_flow2">
+        <omgdi:waypoint x="595.0" y="242.0"></omgdi:waypoint>
+        <omgdi:waypoint x="640.0" y="242.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow3" id="BPMNEdge_flow3">
+        <omgdi:waypoint x="425.0" y="242.0"></omgdi:waypoint>
+        <omgdi:waypoint x="490.0" y="242.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="association1" id="BPMNEdge_association1">
+        <omgdi:waypoint x="543.0" y="160.0"></omgdi:waypoint>
+        <omgdi:waypoint x="542.0" y="215.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>

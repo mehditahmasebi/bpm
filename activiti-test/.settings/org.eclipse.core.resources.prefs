@@ -1,0 +1,11 @@
+eclipse.preferences.version=1
+encoding//src/main/java=UTF-8
+encoding//src/main/java/com/test/activiti/MyProcessEngine.java=UTF-8
+encoding//src/main/java/com/test/activiti/serviceexception/TestServiceException1.java=UTF-8
+encoding//src/main/java/com/test/activiti/serviceexception/TestServiceException2.java=UTF-8
+encoding//src/main/java/com/test/activiti/signalevent/TestErrorEvent_WithSubProcess3.java=UTF-8
+encoding//src/main/java/com/test/activiti/signalevent/TestMessageEvent2.java=UTF-8
+encoding//src/main/java/com/test/activiti/signalevent/TestSignalEvent.java=UTF-8
+encoding//src/test/java=UTF-8
+encoding//src/test/resources=UTF-8
+encoding/<project>=UTF-8

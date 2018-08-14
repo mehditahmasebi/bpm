@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsd="http://www.w3.org/2001/XMLSchema" id="definitions" targetNamespace="http://activiti.org/bpmn20">
+  <process id="vacationRequest" name="Vacation request">
+    <startEvent id="request" activiti:initiator="employeeName">
+      <extensionElements>
+        <activiti:formProperty xsi:type="xsd:anyType" id="numberOfDays" name="Number of days" type="long" value="1" required="true"/>
+        <activiti:formProperty xsi:type="xsd:anyType" id="startDate" name="First day of holiday (dd-MM-yyy)" datePattern="dd-MM-yyyy hh:mm" type="date" required="true"/>
+        <activiti:formProperty xsi:type="xsd:anyType" id="vacationMotivation" name="Motivation" type="string"/>
+      </extensionElements>
+      <outgoing>flow1</outgoing>
+    </startEvent>
+    <sequenceFlow id="flow1" sourceRef="request" targetRef="handleRequest"/>
+    <userTask id="handleRequest" name="Handle vacation request">
+      <extensionElements>
+        <activiti:formProperty xsi:type="xsd:anyType" id="vacationApproved" name="Do you approve this vacation" type="enum" required="true">
+          <activiti:value xsi:type="xsd:anyType" id="true" name="Approve"/>
+          <activiti:value xsi:type="xsd:anyType" id="false" name="Reject"/>
+        </activiti:formProperty>
+        <activiti:formProperty xsi:type="xsd:anyType" id="managerMotivation" name="Motivation" type="string"/>
+      </extensionElements>
+      <documentation id="Documentation_1">
+        ${employeeName} would like to take ${numberOfDays} day(s) of vacation (Motivation: ${vacationMotivation}).
+      </documentation>
+      <incoming>flow1</incoming>
+      <incoming>flow7</incoming>
+      <outgoing>flow2</outgoing>
+      <potentialOwner id="PotentialOwner_1">
+        <resourceAssignmentExpression id="ResourceAssignmentExpression_1">
+          <formalExpression id="FormalExpression_1">management</formalExpression>
+        </resourceAssignmentExpression>
+      </potentialOwner>
+    </userTask>
+    <sequenceFlow id="flow2" sourceRef="handleRequest" targetRef="requestApprovedDecision"/>
+    <exclusiveGateway id="requestApprovedDecision" name="Request approved?">
+      <incoming>flow2</incoming>
+      <outgoing>flow3</outgoing>
+      <outgoing>flow5</outgoing>
+    </exclusiveGateway>
+    <sequenceFlow id="flow3" sourceRef="requestApprovedDecision" targetRef="sendApprovalMail">
+      <conditionExpression xsi:type="tFormalExpression" id="FormalExpression_2">${vacationApproved == 'true'}</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow5" sourceRef="requestApprovedDecision" targetRef="adjustVacationRequestTask">
+      <conditionExpression xsi:type="tFormalExpression" id="FormalExpression_3">${vacationApproved == 'false'}</conditionExpression>
+    </sequenceFlow>
+    <task id="sendApprovalMail" name="Send confirmation e-mail">
+      <incoming>flow3</incoming>
+      <outgoing>flow4</outgoing>
+    </task>
+    <sequenceFlow id="flow4" sourceRef="sendApprovalMail" targetRef="theEnd1"/>
+    <userTask id="adjustVacationRequestTask" name="Adjust vacation request">
+      <extensionElements>
+        <activiti:formProperty xsi:type="xsd:anyType" id="numberOfDays" name="Number of days" value="${numberOfDays}" type="long" required="true"/>
+        <activiti:formProperty xsi:type="xsd:anyType" id="startDate" name="First day of holiday (dd-MM-yyy)" value="${startDate}" datePattern="dd-MM-yyyy hh:mm" type="date" required="true"/>
+        <activiti:formProperty xsi:type="xsd:anyType" id="vacationMotivation" name="Motivation" value="${vacationMotivation}" type="string"/>
+        <activiti:formProperty xsi:type="xsd:anyType" id="resendRequest" name="Resend vacation request to manager?" type="enum" required="true">
+          <activiti:value xsi:type="xsd:anyType" id="true" name="Yes"/>
+          <activiti:value xsi:type="xsd:anyType" id="false" name="No"/>
+        </activiti:formProperty>
+      </extensionElements>
+      <documentation id="Documentation_2">
+        Your manager has disapproved your vacation request for ${numberOfDays} days.
+        Reason: ${managerMotivation}
+      </documentation>
+      <incoming>flow5</incoming>
+      <outgoing>flow6</outgoing>
+      <humanPerformer id="HumanPerformer_1">
+        <resourceAssignmentExpression id="ResourceAssignmentExpression_2">
+          <formalExpression id="FormalExpression_4">${employeeName}</formalExpression>
+        </resourceAssignmentExpression>
+      </humanPerformer>
+    </userTask>
+    <sequenceFlow id="flow6" sourceRef="adjustVacationRequestTask" targetRef="resendRequestDecision"/>
+    <endEvent id="theEnd1">
+      <incoming>flow4</incoming>
+    </endEvent>
+    <exclusiveGateway id="resendRequestDecision" name="Resend request?">
+      <incoming>flow6</incoming>
+      <outgoing>flow7</outgoing>
+      <outgoing>flow8</outgoing>
+    </exclusiveGateway>
+    <sequenceFlow id="flow7" sourceRef="resendRequestDecision" targetRef="handleRequest">
+      <conditionExpression xsi:type="tFormalExpression" id="FormalExpression_5">${resendRequest == 'true'}</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow8" sourceRef="resendRequestDecision" targetRef="theEnd2">
+      <conditionExpression xsi:type="tFormalExpression" id="FormalExpression_6">${resendRequest == 'false'}</conditionExpression>
+    </sequenceFlow>
+    <endEvent id="theEnd2">
+      <incoming>flow8</incoming>
+    </endEvent>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_Process_1" bpmnElement="vacationRequest">
+      <bpmndi:BPMNShape id="BPMNShape_StartEvent_1" bpmnElement="request">
+        <dc:Bounds height="36.0" width="36.0" x="50.0" y="132.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_ExclusiveGateway_1" bpmnElement="requestApprovedDecision" isMarkerVisible="true">
+        <dc:Bounds height="50.0" width="50.0" x="296.0" y="125.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_EndEvent_1" bpmnElement="theEnd1">
+        <dc:Bounds height="36.0" width="36.0" x="556.0" y="132.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_ExclusiveGateway_2" bpmnElement="resendRequestDecision" isMarkerVisible="true">
+        <dc:Bounds height="50.0" width="50.0" x="642.0" y="125.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_EndEvent_2" bpmnElement="theEnd2">
+        <dc:Bounds height="36.0" width="36.0" x="742.0" y="132.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_UserTask_1" bpmnElement="handleRequest">
+        <dc:Bounds height="50.0" width="110.0" x="136.0" y="125.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_Task_1" bpmnElement="sendApprovalMail">
+        <dc:Bounds height="50.0" width="110.0" x="396.0" y="75.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_UserTask_2" bpmnElement="adjustVacationRequestTask">
+        <dc:Bounds height="50.0" width="110.0" x="396.0" y="175.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_1" bpmnElement="flow1" sourceElement="BPMNShape_StartEvent_1" targetElement="BPMNShape_UserTask_1">
+        <di:waypoint xsi:type="dc:Point" x="86.0" y="150.0"/>
+        <di:waypoint xsi:type="dc:Point" x="108.0" y="150.0"/>
+        <di:waypoint xsi:type="dc:Point" x="108.0" y="150.0"/>
+        <di:waypoint xsi:type="dc:Point" x="136.0" y="150.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_2" bpmnElement="flow7" sourceElement="BPMNShape_ExclusiveGateway_2" targetElement="BPMNShape_UserTask_1">
+        <di:waypoint xsi:type="dc:Point" x="667.0" y="125.0"/>
+        <di:waypoint xsi:type="dc:Point" x="667.0" y="125.0"/>
+        <di:waypoint xsi:type="dc:Point" x="191.0" y="125.0"/>
+        <di:waypoint xsi:type="dc:Point" x="191.0" y="125.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_3" bpmnElement="flow2" sourceElement="BPMNShape_UserTask_1" targetElement="BPMNShape_ExclusiveGateway_1">
+        <di:waypoint xsi:type="dc:Point" x="246.0" y="150.0"/>
+        <di:waypoint xsi:type="dc:Point" x="268.0" y="150.0"/>
+        <di:waypoint xsi:type="dc:Point" x="268.0" y="150.0"/>
+        <di:waypoint xsi:type="dc:Point" x="296.0" y="150.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_4" bpmnElement="flow3" sourceElement="BPMNShape_ExclusiveGateway_1" targetElement="BPMNShape_Task_1">
+        <di:waypoint xsi:type="dc:Point" x="321.0" y="125.0"/>
+        <di:waypoint xsi:type="dc:Point" x="321.0" y="100.0"/>
+        <di:waypoint xsi:type="dc:Point" x="396.0" y="100.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_5" bpmnElement="flow5" sourceElement="BPMNShape_ExclusiveGateway_1" targetElement="BPMNShape_UserTask_2">
+        <di:waypoint xsi:type="dc:Point" x="321.0" y="176.0"/>
+        <di:waypoint xsi:type="dc:Point" x="321.0" y="200.0"/>
+        <di:waypoint xsi:type="dc:Point" x="396.0" y="200.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_6" bpmnElement="flow4" sourceElement="BPMNShape_Task_1" targetElement="BPMNShape_EndEvent_1">
+        <di:waypoint xsi:type="dc:Point" x="506.0" y="100.0"/>
+        <di:waypoint xsi:type="dc:Point" x="574.0" y="100.0"/>
+        <di:waypoint xsi:type="dc:Point" x="574.0" y="132.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_7" bpmnElement="flow6" sourceElement="BPMNShape_UserTask_2" targetElement="BPMNShape_ExclusiveGateway_2">
+        <di:waypoint xsi:type="dc:Point" x="506.0" y="200.0"/>
+        <di:waypoint xsi:type="dc:Point" x="667.0" y="200.0"/>
+        <di:waypoint xsi:type="dc:Point" x="667.0" y="176.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_8" bpmnElement="flow8" sourceElement="BPMNShape_ExclusiveGateway_2" targetElement="BPMNShape_EndEvent_2">
+        <di:waypoint xsi:type="dc:Point" x="693.0" y="150.0"/>
+        <di:waypoint xsi:type="dc:Point" x="715.0" y="150.0"/>
+        <di:waypoint xsi:type="dc:Point" x="715.0" y="150.0"/>
+        <di:waypoint xsi:type="dc:Point" x="742.0" y="150.0"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>

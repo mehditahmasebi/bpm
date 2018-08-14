@@ -1,0 +1,81 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+						http://www.springframework.org/schema/beans/spring-beans-3.0.xsd 
+						http://www.springframework.org/schema/bean
+						http://www.springframework.org/schema/bean/spring-bean-3.0.xsd 
+						http://www.springframework.org/schema/context
+						http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+
+
+	<bean id="initDB" class="com.test.activiti.InitDB" />
+	<!-- <bean id="awServiceTask1" class="com.test.activiti.autowiredservicetask.AWServiceTask1" 
+		init-method="init" /> -->
+	<context:annotation-config />
+	<context:component-scan base-package="com.test" />
+
+	<bean id="dataSource"
+		class="org.springframework.jdbc.datasource.SimpleDriverDataSource">
+		<!-- H2 -->
+<!-- 		<property name="url" value="jdbc:h2:~/activiti" /> -->
+<!-- 		<property name="url" value="jdbc:h2:tcp://localhost/~/activiti" /> -->
+		<property name="url" value="jdbc:h2:mem:activiti;DB_CLOSE_DELAY=1000"  />
+		<property name="driverClass" value="org.h2.Driver" />
+		<property name="username" value="sa" />
+		<property name="password" value="" />
+		<!-- MySQL -->
+		<!-- <property name="username" value="root" /> -->
+		<!-- <property name="password" value="root" /> -->
+		<!-- <property name="url" value="jdbc:mysql://127.0.0.1:3306/activiti" 
+			/> -->
+		<!-- <property name="driverClass" value="com.mysql.jdbc.Driver" /> -->
+		<!-- <property name="connectionProperties"> -->
+		<!-- <props> -->
+		<!-- <prop key="autoReconnect">true</prop> -->
+		<!-- <prop key="useUnicode">true</prop> -->
+		<!-- <prop key="characterEncoding">UTF-8</prop> -->
+		<!-- </props> -->
+		<!-- </property> -->
+
+	</bean>
+
+	<bean id="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<bean id="processEngineConfiguration" class="org.activiti.spring.SpringProcessEngineConfiguration">
+		<property name="databaseSchemaUpdate" value="true" /> <!-- important and valid values : true,false,create-drop -->
+		<property name="dataSource" ref="dataSource" />
+		<property name="transactionManager" ref="transactionManager" />
+		<property name="jobExecutorActivate" value="true" />
+		<property name="asyncExecutorEnabled" value="true" />
+		<property name="asyncExecutorActivate" value="true" />
+		<property name="customSessionFactories">
+			<list>
+				<bean class="com.test.activiti.useridentity.spring.CustomUserEntityManagerFactory">
+					<property name="userDao" ref="userDao" />
+				</bean>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="processEngine" class="org.activiti.spring.ProcessEngineFactoryBean">
+		<property name="processEngineConfiguration" ref="processEngineConfiguration" />
+	</bean>
+	
+	<!-- Customer Sample Implementation of Repository -->
+	<bean id="userDao" class="com.test.activiti.useridentity.security.impl.UserStaticDao"/>
+
+	<bean id="currentUserService" class="com.test.activiti.useridentity.security.impl.CurrentUserServiceStaticImpl"/>
+
+	<!-- <bean id="threadFactory" class="org.springframework.jndi.JndiObjectFactoryBean"> -->
+	<!-- <property name="jndiName" value="java:jboss/ee/concurrency/factory/default" 
+		/> -->
+	<!-- </bean> -->
+
+	<!-- <bean id="customJobExecutor" class="org.activiti.engine.impl.jobexecutor.ManagedJobExecutor"> -->
+	<!-- <property name="threadFactory" ref="threadFactory"/> -->
+	<!-- </bean> -->
+</beans>

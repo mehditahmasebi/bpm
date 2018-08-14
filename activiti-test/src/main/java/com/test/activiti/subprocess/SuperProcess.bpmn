@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://www.activiti.org/test">
+  <process id="superProcess" name="Super process" isExecutable="true">
+    <startEvent id="startevent1" name="Start"></startEvent>
+    <endEvent id="endevent1" name="End"></endEvent>
+    <callActivity id="callactivity1" name="Call activity" calledElement="subProcess">
+      <extensionElements>
+        <activiti:in source="var1" target="subvar1"></activiti:in>
+      </extensionElements>
+    </callActivity>
+    <sequenceFlow id="flow1" sourceRef="startevent1" targetRef="initialTask"></sequenceFlow>
+    <sequenceFlow id="flow2" sourceRef="callactivity1" targetRef="endevent1"></sequenceFlow>
+    <dataObject id="var1" name="The First Variable" itemSubjectRef="xsd:string">
+      <extensionElements>
+        <activiti:value>Hello First Variable</activiti:value>
+      </extensionElements>
+    </dataObject>
+    <serviceTask id="initialTask" name="Initial Task" activiti:class="com.test.activiti.subprocess.InitialTask"></serviceTask>
+    <sequenceFlow id="flow3" sourceRef="initialTask" targetRef="callactivity1"></sequenceFlow>
+    <textAnnotation id="textannotation1">
+      <text>Work Fine</text>
+    </textAnnotation>
+    <association id="association1" sourceRef="textannotation1" targetRef="callactivity1"></association>
+    <textAnnotation id="textannotation2">
+      <text>Call Activiti vs Sub Process :
+
+1) If you have a regular sub-process, it is modelled as a part of the parent worklfow (in the same BPMN and as a child of the &lt;process&gt; XML element). If the sub-process you want to call is subject to change, independent of the parent-process, you can use a call-activity. The sub-process that is called is an EXTERNAL process (not part of the parent BPMN, but lives in it's own BPMN). This allows you to redeploy the child-process without the need to alter the parent-process. A normal sub-process is treated as a direct child of the process-instance, so you can access the parent's process-variables from within the sub-process. On the contrary, a call-activity does not have access to the parent variables and is a "process instance" itself. You can expose variables from the parent-process to the call-activity by using the in/out declarations (see userguide).
+
+2) If you want to run a sub-process in parallel with other activities in the parent-process, you'll need to add a parallel gateway in front the sub-process element and the "normal" activity in the process. At the point where you want to join the two parallel paths (normal activities in parent and subprocess as a whole) you add another joining parallel gateway (see userguide for fork/join example). The parent process will only move past the "join" gataway IF both subprocess is complete and normal activities before the join in the parent are complete.
+
+3) If you have a sub-process, all sequence-flows in that sub-process should have a target that also is part of the sub-process. You cannot, for example, make the subprocess flow to a userTask that is part of the parent-process. For subprocess-to-parent communication, use boundary-events or similar mechanism.
+</text>
+    </textAnnotation>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_superProcess">
+    <bpmndi:BPMNPlane bpmnElement="superProcess" id="BPMNPlane_superProcess">
+      <bpmndi:BPMNShape bpmnElement="startevent1" id="BPMNShape_startevent1">
+        <omgdc:Bounds height="35.0" width="35.0" x="240.0" y="225.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="endevent1" id="BPMNShape_endevent1">
+        <omgdc:Bounds height="35.0" width="35.0" x="640.0" y="225.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="callactivity1" id="BPMNShape_callactivity1">
+        <omgdc:Bounds height="55.0" width="105.0" x="490.0" y="215.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="initialTask" id="BPMNShape_initialTask">
+        <omgdc:Bounds height="55.0" width="105.0" x="320.0" y="215.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="textannotation1" id="BPMNShape_textannotation1">
+        <omgdc:Bounds height="50.0" width="100.0" x="493.0" y="110.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="textannotation2" id="BPMNShape_textannotation2">
+        <omgdc:Bounds height="441.0" width="371.0" x="720.0" y="40.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="flow1" id="BPMNEdge_flow1">
+        <omgdi:waypoint x="275.0" y="242.0"></omgdi:waypoint>
+        <omgdi:waypoint x="320.0" y="242.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow2" id="BPMNEdge_flow2">
+        <omgdi:waypoint x="595.0" y="242.0"></omgdi:waypoint>
+        <omgdi:waypoint x="640.0" y="242.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow3" id="BPMNEdge_flow3">
+        <omgdi:waypoint x="425.0" y="242.0"></omgdi:waypoint>
+        <omgdi:waypoint x="490.0" y="242.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="association1" id="BPMNEdge_association1">
+        <omgdi:waypoint x="543.0" y="160.0"></omgdi:waypoint>
+        <omgdi:waypoint x="542.0" y="215.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>

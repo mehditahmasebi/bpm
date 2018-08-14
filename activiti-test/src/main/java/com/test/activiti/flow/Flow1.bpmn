@@ -1,0 +1,636 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://www.activiti.org/test">
+  <collaboration id="Collaboration">
+    <participant id="pool1" name="فرآيند نقطه به نقطه اختصاصي لايه دو" processRef="PTP_SERVICE"></participant>
+  </collaboration>
+  <process id="PTP_SERVICE" name="سرویس نقطه به نقطه اختصاصی لایه دو" isExecutable="true">
+    <laneSet id="laneSet_PTP_SERVICE">
+      <lane id="lane1">
+        <flowNodeRef>exclusivegateway1</flowNodeRef>
+        <flowNodeRef>PTP_INFORM_CUSTOMER</flowNodeRef>
+        <flowNodeRef>PTP_INFORM_BL</flowNodeRef>
+        <flowNodeRef>PTP_SECURITY_CHECK</flowNodeRef>
+        <flowNodeRef>exclusivegateway2</flowNodeRef>
+        <flowNodeRef>PTP_INFORM_CUSTOMER_SECURITY</flowNodeRef>
+        <flowNodeRef>REPORT_NO_FEASIBLE_SECURITY</flowNodeRef>
+        <flowNodeRef>terminateendevent1</flowNodeRef>
+        <flowNodeRef>PTP_CREDIT_CHECK</flowNodeRef>
+        <flowNodeRef>PTP_TECHNICAL_VALIDATION</flowNodeRef>
+        <flowNodeRef>PTP_SOURCE_CHECK</flowNodeRef>
+        <flowNodeRef>exclusivegateway3</flowNodeRef>
+        <flowNodeRef>terminateendevent2</flowNodeRef>
+        <flowNodeRef>PTP_INFORM_CUSTOMER_CREDIT_REJECT</flowNodeRef>
+        <flowNodeRef>REPORT_NO_FEASIBLE_CREDIT</flowNodeRef>
+        <flowNodeRef>exclusivegateway4</flowNodeRef>
+        <flowNodeRef>PTP_INFORM_CUSTOMER_TECHNICAL_REJECT</flowNodeRef>
+        <flowNodeRef>REPORT_NO_FEASIBLE_TECHNICAL</flowNodeRef>
+        <flowNodeRef>terminateendevent3</flowNodeRef>
+        <flowNodeRef>PTP_PROVIDE_FACILITIES</flowNodeRef>
+        <flowNodeRef>exclusivegateway5</flowNodeRef>
+        <flowNodeRef>PTP_SEND_SERVICE_FORM</flowNodeRef>
+        <flowNodeRef>PTP_PAYMENT_CHECK</flowNodeRef>
+        <flowNodeRef>PTP_MARGIN_CHECK</flowNodeRef>
+        <flowNodeRef>PTP_CHANNEL_DEFINITION</flowNodeRef>
+        <flowNodeRef>PTP_INFORM_CUSTOMER_CHANNEL_INSTALLED</flowNodeRef>
+        <flowNodeRef>PTP_SETUP</flowNodeRef>
+        <flowNodeRef>PTP_MALI_CHECK</flowNodeRef>
+        <flowNodeRef>exclusivegateway6</flowNodeRef>
+        <flowNodeRef>PTP_MALI_IDENTIFY</flowNodeRef>
+        <flowNodeRef>exclusivegateway7</flowNodeRef>
+        <flowNodeRef>timerintermediatecatchevent1</flowNodeRef>
+        <flowNodeRef>PTP_BILLING</flowNodeRef>
+        <flowNodeRef>REPORT_BILLING_INSTALLED</flowNodeRef>
+        <flowNodeRef>PTP_INFORM_SETUP</flowNodeRef>
+        <flowNodeRef>endevent1</flowNodeRef>
+        <flowNodeRef>PTP_NEW_REQUEST_SEND_SMS</flowNodeRef>
+        <flowNodeRef>parallelgateway2</flowNodeRef>
+        <flowNodeRef>endevent2</flowNodeRef>
+        <flowNodeRef>PTP_SETUP_SEND_SMS</flowNodeRef>
+        <flowNodeRef>parallelgateway3</flowNodeRef>
+        <flowNodeRef>inclusivegateway2</flowNodeRef>
+        <flowNodeRef>startevent1</flowNodeRef>
+        <flowNodeRef>inclusivegateway4</flowNodeRef>
+      </lane>
+    </laneSet>
+    <exclusiveGateway id="exclusivegateway1" name="Exclusive Gateway"></exclusiveGateway>
+    <serviceTask id="PTP_INFORM_CUSTOMER" name="اطلاع رسانی به مشترک" activiti:delegateExpression="${ptpInformCustomerBLServiceV1}"></serviceTask>
+    <serviceTask id="PTP_INFORM_BL" name="اطلاع رسانی BL" activiti:delegateExpression="${ptpInformBLServiceV1}"></serviceTask>
+    <sequenceFlow id="flow2" name="in blacklist" sourceRef="exclusivegateway1" targetRef="PTP_INFORM_CUSTOMER">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${PTP_BL_RESULT==true}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow3" name="not in blacklist" sourceRef="exclusivegateway1" targetRef="PTP_INFORM_BL"></sequenceFlow>
+    <userTask id="PTP_SECURITY_CHECK" name="امکانسنجی امنیت"></userTask>
+    <sequenceFlow id="flow4" sourceRef="PTP_INFORM_CUSTOMER" targetRef="PTP_SECURITY_CHECK"></sequenceFlow>
+    <exclusiveGateway id="exclusivegateway2" name="Exclusive Gateway"></exclusiveGateway>
+    <sequenceFlow id="flow5" sourceRef="PTP_SECURITY_CHECK" targetRef="exclusivegateway2"></sequenceFlow>
+    <sequenceFlow id="flow6" sourceRef="PTP_INFORM_BL" targetRef="inclusivegateway4"></sequenceFlow>
+    <sequenceFlow id="flow7" name="مثبت" sourceRef="exclusivegateway2" targetRef="inclusivegateway4">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${PTP_SECURITY_CHECK_RESULT == true}]]></conditionExpression>
+    </sequenceFlow>
+    <serviceTask id="PTP_INFORM_CUSTOMER_SECURITY" name="اطلاع رسانی به مشترک" activiti:delegateExpression="${ptpInformCustomerSecurityServiceV1}"></serviceTask>
+    <sequenceFlow id="flow8" name="منفی" sourceRef="exclusivegateway2" targetRef="PTP_INFORM_CUSTOMER_SECURITY">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${PTP_SECURITY_CHECK_RESULT == false}]]></conditionExpression>
+    </sequenceFlow>
+    <serviceTask id="REPORT_NO_FEASIBLE_SECURITY" name="گزارش گیری عدم تائید" activiti:delegateExpression="${reportNoFeasiblePtpServiceV1}"></serviceTask>
+    <sequenceFlow id="flow10" sourceRef="PTP_INFORM_CUSTOMER_SECURITY" targetRef="REPORT_NO_FEASIBLE_SECURITY"></sequenceFlow>
+    <endEvent id="terminateendevent1" name="TerminateEndEvent">
+      <terminateEventDefinition></terminateEventDefinition>
+    </endEvent>
+    <sequenceFlow id="flow11" sourceRef="REPORT_NO_FEASIBLE_SECURITY" targetRef="terminateendevent1"></sequenceFlow>
+    <userTask id="PTP_CREDIT_CHECK" name="امکانسنجی اعتبار"></userTask>
+    <sequenceFlow id="flow12" sourceRef="inclusivegateway4" targetRef="PTP_CREDIT_CHECK"></sequenceFlow>
+    <userTask id="PTP_TECHNICAL_VALIDATION" name="امکانسنجی فنی"></userTask>
+    <sequenceFlow id="flow13" sourceRef="inclusivegateway4" targetRef="PTP_TECHNICAL_VALIDATION"></sequenceFlow>
+    <userTask id="PTP_SOURCE_CHECK" name="امکانسنجی نوع مرکز"></userTask>
+    <exclusiveGateway id="exclusivegateway3" name="Exclusive Gateway"></exclusiveGateway>
+    <sequenceFlow id="flow15" sourceRef="PTP_CREDIT_CHECK" targetRef="exclusivegateway3"></sequenceFlow>
+    <serviceTask id="PTP_INFORM_CUSTOMER_CREDIT_REJECT" name="اطلاع رسانی به مشترک" activiti:delegateExpression="${ptpInformCustomerCreditServiceV1}"></serviceTask>
+    <serviceTask id="REPORT_NO_FEASIBLE_CREDIT" name="گزارش گیری عدم تائید" activiti:delegateExpression="${reportNoFeasiblePtpServiceV1}"></serviceTask>
+    <sequenceFlow id="flow16" name="منفی" sourceRef="exclusivegateway3" targetRef="PTP_INFORM_CUSTOMER_CREDIT_REJECT">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${PTP_CREDIT_CHECK_RESULT == false}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow17" sourceRef="PTP_INFORM_CUSTOMER_CREDIT_REJECT" targetRef="REPORT_NO_FEASIBLE_CREDIT"></sequenceFlow>
+    <sequenceFlow id="flow18" sourceRef="REPORT_NO_FEASIBLE_CREDIT" targetRef="terminateendevent2"></sequenceFlow>
+    <endEvent id="terminateendevent2" name="End">
+      <terminateEventDefinition></terminateEventDefinition>
+    </endEvent>
+    <serviceTask id="PTP_INFORM_CUSTOMER_TECHNICAL_REJECT" name="اطلاع رسانی به مشترک" activiti:delegateExpression="${infromEngineeringSupplementaryV1}"></serviceTask>
+    <serviceTask id="REPORT_NO_FEASIBLE_TECHNICAL" name="گزارش گیری عدم تائید" activiti:delegateExpression="${reportNoFeasiblePtpServiceV1}"></serviceTask>
+    <exclusiveGateway id="exclusivegateway4" name="Exclusive Gateway"></exclusiveGateway>
+    <sequenceFlow id="flow19" sourceRef="PTP_TECHNICAL_VALIDATION" targetRef="exclusivegateway4"></sequenceFlow>
+    <sequenceFlow id="flow20" name="منفی" sourceRef="exclusivegateway4" targetRef="PTP_INFORM_CUSTOMER_TECHNICAL_REJECT">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${PTP_TECHNICAL_VALIDATION_RESULT == 'reject'}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow21" sourceRef="PTP_INFORM_CUSTOMER_TECHNICAL_REJECT" targetRef="REPORT_NO_FEASIBLE_TECHNICAL"></sequenceFlow>
+    <endEvent id="terminateendevent3" name="TerminateEndEvent">
+      <terminateEventDefinition></terminateEventDefinition>
+    </endEvent>
+    <sequenceFlow id="flow22" sourceRef="REPORT_NO_FEASIBLE_TECHNICAL" targetRef="terminateendevent3"></sequenceFlow>
+    <sequenceFlow id="flow23" name="مثبت" sourceRef="exclusivegateway4" targetRef="parallelgateway3">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${PTP_TECHNICAL_VALIDATION_RESULT == 'accept'}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow24" name="مثبت" sourceRef="exclusivegateway3" targetRef="parallelgateway3">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${PTP_CREDIT_CHECK_RESULT == true}]]></conditionExpression>
+    </sequenceFlow>
+    <userTask id="PTP_PROVIDE_FACILITIES" name="تأمین امکانات"></userTask>
+    <sequenceFlow id="flow25" name="تأمین امکانات" sourceRef="exclusivegateway4" targetRef="PTP_PROVIDE_FACILITIES">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${PTP_TECHNICAL_VALIDATION_RESULT=='providingFacilities'}]]></conditionExpression>
+    </sequenceFlow>
+    <exclusiveGateway id="exclusivegateway5" name="Exclusive Gateway"></exclusiveGateway>
+    <sequenceFlow id="flow26" sourceRef="PTP_PROVIDE_FACILITIES" targetRef="exclusivegateway5"></sequenceFlow>
+    <sequenceFlow id="flow27" name="در دست بررسی" sourceRef="exclusivegateway5" targetRef="PTP_PROVIDE_FACILITIES">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${PTP_PROVIDE_FACILITIES_IN_PROGRESS==false}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow28" sourceRef="exclusivegateway5" targetRef="PTP_TECHNICAL_VALIDATION">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${PTP_PROVIDE_FACILITIES_IN_PROGRESS==true}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow29" sourceRef="PTP_SOURCE_CHECK" targetRef="inclusivegateway2"></sequenceFlow>
+    <serviceTask id="PTP_SEND_SERVICE_FORM" name="ارسال سرویس فرم" activiti:delegateExpression="${serviceFormPTPServiceV1}"></serviceTask>
+    <userTask id="PTP_PAYMENT_CHECK" name="تأیید پرداخت"></userTask>
+    <sequenceFlow id="flow31" sourceRef="PTP_SEND_SERVICE_FORM" targetRef="PTP_PAYMENT_CHECK"></sequenceFlow>
+    <userTask id="PTP_MARGIN_CHECK" name="تایید وجه التضمین"></userTask>
+    <sequenceFlow id="flow32" sourceRef="PTP_PAYMENT_CHECK" targetRef="PTP_MARGIN_CHECK"></sequenceFlow>
+    <userTask id="PTP_CHANNEL_DEFINITION" name="تعریف کانال"></userTask>
+    <sequenceFlow id="flow33" sourceRef="PTP_MARGIN_CHECK" targetRef="PTP_CHANNEL_DEFINITION"></sequenceFlow>
+    <serviceTask id="PTP_INFORM_CUSTOMER_CHANNEL_INSTALLED" name="اطلاع رسانی به مشترک" activiti:delegateExpression="${informCustomerChannelServiceV1}"></serviceTask>
+    <sequenceFlow id="flow34" sourceRef="PTP_CHANNEL_DEFINITION" targetRef="PTP_INFORM_CUSTOMER_CHANNEL_INSTALLED"></sequenceFlow>
+    <userTask id="PTP_SETUP" name="برقراری مدار"></userTask>
+    <sequenceFlow id="flow35" sourceRef="PTP_INFORM_CUSTOMER_CHANNEL_INSTALLED" targetRef="PTP_SETUP"></sequenceFlow>
+    <serviceTask id="PTP_MALI_CHECK" name="بررسی کدهای مالی" activiti:delegateExpression="${ptpMaliCheckServiceV1}"></serviceTask>
+    <sequenceFlow id="flow36" sourceRef="PTP_SETUP" targetRef="parallelgateway2"></sequenceFlow>
+    <exclusiveGateway id="exclusivegateway6" name="Exclusive Gateway"></exclusiveGateway>
+    <sequenceFlow id="flow37" sourceRef="PTP_MALI_CHECK" targetRef="exclusivegateway6"></sequenceFlow>
+    <userTask id="PTP_MALI_IDENTIFY" name="اعلام کدهای مالی"></userTask>
+    <sequenceFlow id="flow38" name="کد مالی ندارد" sourceRef="exclusivegateway6" targetRef="PTP_MALI_IDENTIFY">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${PTP_MALI_CODE_VALID == false}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow39" sourceRef="PTP_MALI_IDENTIFY" targetRef="PTP_MALI_CHECK"></sequenceFlow>
+    <exclusiveGateway id="exclusivegateway7" name="Exclusive Gateway"></exclusiveGateway>
+    <sequenceFlow id="flow40" name="کد مالی دارد" sourceRef="exclusivegateway6" targetRef="exclusivegateway7">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${PTP_MALI_CODE_VALID == true}]]></conditionExpression>
+    </sequenceFlow>
+    <intermediateCatchEvent id="timerintermediatecatchevent1" name="TimerCatchEvent">
+      <timerEventDefinition>
+        <timeDuration>PT8H</timeDuration>
+      </timerEventDefinition>
+    </intermediateCatchEvent>
+    <serviceTask id="PTP_BILLING" name="بیلینگ" activiti:delegateExpression="${ptpBillingServiceV1}"></serviceTask>
+    <serviceTask id="REPORT_BILLING_INSTALLED" name="گزارش گیری بیلینگ" activiti:delegateExpression="${ptpBillingReportServiceV1}"></serviceTask>
+    <serviceTask id="PTP_INFORM_SETUP" name="اطلاع رسانی برقراری مدار" activiti:delegateExpression="${ptpInformSetupFinalServiceV1}"></serviceTask>
+    <sequenceFlow id="flow44" sourceRef="PTP_BILLING" targetRef="REPORT_BILLING_INSTALLED"></sequenceFlow>
+    <sequenceFlow id="flow46" sourceRef="REPORT_BILLING_INSTALLED" targetRef="PTP_INFORM_SETUP"></sequenceFlow>
+    <endEvent id="endevent1" name="End"></endEvent>
+    <sequenceFlow id="flow47" sourceRef="PTP_INFORM_SETUP" targetRef="endevent1"></sequenceFlow>
+    <sequenceFlow id="flow48" name="آماده است" sourceRef="exclusivegateway7" targetRef="PTP_BILLING">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${taskReady.isReady("PTP_BILLING_READY" , execution)}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow49" sourceRef="exclusivegateway7" targetRef="timerintermediatecatchevent1"></sequenceFlow>
+    <sequenceFlow id="flow50" sourceRef="timerintermediatecatchevent1" targetRef="exclusivegateway7"></sequenceFlow>
+    <serviceTask id="PTP_NEW_REQUEST_SEND_SMS" name="ارسال پیامک جهت در خواست جدید" activiti:delegateExpression="${ptpNewRequestSendSmsServiceV1}"></serviceTask>
+    <sequenceFlow id="flow51" sourceRef="PTP_NEW_REQUEST_SEND_SMS" targetRef="exclusivegateway1"></sequenceFlow>
+    <parallelGateway id="parallelgateway2" name="Parallel Gateway"></parallelGateway>
+    <sequenceFlow id="flow52" sourceRef="parallelgateway2" targetRef="PTP_MALI_CHECK"></sequenceFlow>
+    <sequenceFlow id="flow53" sourceRef="parallelgateway2" targetRef="PTP_SETUP_SEND_SMS"></sequenceFlow>
+    <serviceTask id="PTP_SETUP_SEND_SMS" name="ارسال پیامک جهت برقراری مدار" activiti:delegateExpression="${ptpSetupSendSmsServiceV1}"></serviceTask>
+    <endEvent id="endevent2" name="End"></endEvent>
+    <sequenceFlow id="flow54" sourceRef="PTP_SETUP_SEND_SMS" targetRef="endevent2"></sequenceFlow>
+    <parallelGateway id="parallelgateway3" name="Inclusive Gateway"></parallelGateway>
+    <sequenceFlow id="flow55" sourceRef="parallelgateway3" targetRef="inclusivegateway2"></sequenceFlow>
+    <inclusiveGateway id="inclusivegateway2" name="Inclusive Gateway"></inclusiveGateway>
+    <sequenceFlow id="flow56" sourceRef="inclusivegateway2" targetRef="PTP_SEND_SERVICE_FORM"></sequenceFlow>
+    <startEvent id="startevent1" name="Start"></startEvent>
+    <sequenceFlow id="flow58" sourceRef="startevent1" targetRef="PTP_NEW_REQUEST_SEND_SMS"></sequenceFlow>
+    <inclusiveGateway id="inclusivegateway4" name="Parallel Gateway"></inclusiveGateway>
+    <sequenceFlow id="flow59" name="${PTP_REQUEST_IS_MAHROOM == true}" sourceRef="inclusivegateway4" targetRef="PTP_SOURCE_CHECK">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${PTP_REQUEST_IS_MAHROOM == true}]]></conditionExpression>
+    </sequenceFlow>
+    <textAnnotation id="textannotation1">
+      <text>مشتری</text>
+    </textAnnotation>
+    <textAnnotation id="textannotation2">
+      <text>اداره بازاريابي - اداره امنيت</text>
+    </textAnnotation>
+    <textAnnotation id="textannotation3">
+      <text>نتیجه امکانسنجی امنیت</text>
+    </textAnnotation>
+    <textAnnotation id="textannotation4">
+      <text>اداره کنترل</text>
+    </textAnnotation>
+    <textAnnotation id="textannotation5">
+      <text>اداره کل مهندسی عملیات شبکه و انتقال ماهواره</text>
+    </textAnnotation>
+    <textAnnotation id="textannotation6">
+      <text>اداره قراردادها- اداره مالی</text>
+    </textAnnotation>
+    <textAnnotation id="textannotation7">
+      <text>اداره واگذاري مدارات</text>
+    </textAnnotation>
+    <textAnnotation id="textannotation8">
+      <text>اداره صورتحسابگيري</text>
+    </textAnnotation>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Collaboration">
+    <bpmndi:BPMNPlane bpmnElement="Collaboration" id="BPMNPlane_Collaboration">
+      <bpmndi:BPMNShape bpmnElement="pool1" id="BPMNShape_pool1">
+        <omgdc:Bounds height="1060.0" width="3591.0" x="50.0" y="30.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="lane1" id="BPMNShape_lane1">
+        <omgdc:Bounds height="1060.0" width="3571.0" x="70.0" y="30.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="exclusivegateway1" id="BPMNShape_exclusivegateway1">
+        <omgdc:Bounds height="40.0" width="40.0" x="227.0" y="200.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="PTP_INFORM_CUSTOMER" id="BPMNShape_PTP_INFORM_CUSTOMER">
+        <omgdc:Bounds height="55.0" width="105.0" x="390.0" y="193.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="PTP_INFORM_BL" id="BPMNShape_PTP_INFORM_BL">
+        <omgdc:Bounds height="55.0" width="105.0" x="390.0" y="270.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="PTP_SECURITY_CHECK" id="BPMNShape_PTP_SECURITY_CHECK">
+        <omgdc:Bounds height="55.0" width="105.0" x="540.0" y="193.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="exclusivegateway2" id="BPMNShape_exclusivegateway2">
+        <omgdc:Bounds height="40.0" width="40.0" x="690.0" y="201.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="PTP_INFORM_CUSTOMER_SECURITY" id="BPMNShape_PTP_INFORM_CUSTOMER_SECURITY">
+        <omgdc:Bounds height="55.0" width="105.0" x="658.0" y="77.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="REPORT_NO_FEASIBLE_SECURITY" id="BPMNShape_REPORT_NO_FEASIBLE_SECURITY">
+        <omgdc:Bounds height="55.0" width="105.0" x="800.0" y="77.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="terminateendevent1" id="BPMNShape_terminateendevent1">
+        <omgdc:Bounds height="35.0" width="35.0" x="930.0" y="87.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="PTP_CREDIT_CHECK" id="BPMNShape_PTP_CREDIT_CHECK">
+        <omgdc:Bounds height="55.0" width="105.0" x="1012.0" y="174.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="PTP_TECHNICAL_VALIDATION" id="BPMNShape_PTP_TECHNICAL_VALIDATION">
+        <omgdc:Bounds height="55.0" width="105.0" x="1025.0" y="270.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="PTP_SOURCE_CHECK" id="BPMNShape_PTP_SOURCE_CHECK">
+        <omgdc:Bounds height="55.0" width="105.0" x="908.0" y="617.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="exclusivegateway3" id="BPMNShape_exclusivegateway3">
+        <omgdc:Bounds height="40.0" width="40.0" x="1162.0" y="182.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="PTP_INFORM_CUSTOMER_CREDIT_REJECT" id="BPMNShape_PTP_INFORM_CUSTOMER_CREDIT_REJECT">
+        <omgdc:Bounds height="55.0" width="105.0" x="1130.0" y="70.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="REPORT_NO_FEASIBLE_CREDIT" id="BPMNShape_REPORT_NO_FEASIBLE_CREDIT">
+        <omgdc:Bounds height="55.0" width="105.0" x="1280.0" y="70.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="terminateendevent2" id="BPMNShape_terminateendevent2">
+        <omgdc:Bounds height="35.0" width="35.0" x="1430.0" y="80.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="PTP_INFORM_CUSTOMER_TECHNICAL_REJECT" id="BPMNShape_PTP_INFORM_CUSTOMER_TECHNICAL_REJECT">
+        <omgdc:Bounds height="55.0" width="105.0" x="1500.0" y="70.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="REPORT_NO_FEASIBLE_TECHNICAL" id="BPMNShape_REPORT_NO_FEASIBLE_TECHNICAL">
+        <omgdc:Bounds height="55.0" width="105.0" x="1640.0" y="70.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="exclusivegateway4" id="BPMNShape_exclusivegateway4">
+        <omgdc:Bounds height="40.0" width="40.0" x="1532.0" y="277.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="terminateendevent3" id="BPMNShape_terminateendevent3">
+        <omgdc:Bounds height="35.0" width="35.0" x="1780.0" y="80.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="PTP_PROVIDE_FACILITIES" id="BPMNShape_PTP_PROVIDE_FACILITIES">
+        <omgdc:Bounds height="55.0" width="105.0" x="1500.0" y="520.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="exclusivegateway5" id="BPMNShape_exclusivegateway5">
+        <omgdc:Bounds height="40.0" width="40.0" x="1384.0" y="527.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="PTP_SEND_SERVICE_FORM" id="BPMNShape_PTP_SEND_SERVICE_FORM">
+        <omgdc:Bounds height="55.0" width="105.0" x="1830.0" y="617.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="PTP_PAYMENT_CHECK" id="BPMNShape_PTP_PAYMENT_CHECK">
+        <omgdc:Bounds height="55.0" width="105.0" x="1990.0" y="617.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="PTP_MARGIN_CHECK" id="BPMNShape_PTP_MARGIN_CHECK">
+        <omgdc:Bounds height="55.0" width="105.0" x="2160.0" y="617.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="PTP_CHANNEL_DEFINITION" id="BPMNShape_PTP_CHANNEL_DEFINITION">
+        <omgdc:Bounds height="55.0" width="105.0" x="2320.0" y="700.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="PTP_INFORM_CUSTOMER_CHANNEL_INSTALLED" id="BPMNShape_PTP_INFORM_CUSTOMER_CHANNEL_INSTALLED">
+        <omgdc:Bounds height="55.0" width="105.0" x="2390.0" y="77.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="PTP_SETUP" id="BPMNShape_PTP_SETUP">
+        <omgdc:Bounds height="55.0" width="105.0" x="2494.0" y="700.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="PTP_MALI_CHECK" id="BPMNShape_PTP_MALI_CHECK">
+        <omgdc:Bounds height="55.0" width="105.0" x="2650.0" y="600.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="exclusivegateway6" id="BPMNShape_exclusivegateway6">
+        <omgdc:Bounds height="40.0" width="40.0" x="2810.0" y="607.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="PTP_MALI_IDENTIFY" id="BPMNShape_PTP_MALI_IDENTIFY">
+        <omgdc:Bounds height="55.0" width="105.0" x="2920.0" y="600.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="exclusivegateway7" id="BPMNShape_exclusivegateway7">
+        <omgdc:Bounds height="40.0" width="40.0" x="2970.0" y="920.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="timerintermediatecatchevent1" id="BPMNShape_timerintermediatecatchevent1">
+        <omgdc:Bounds height="35.0" width="35.0" x="2973.0" y="1010.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="PTP_BILLING" id="BPMNShape_PTP_BILLING">
+        <omgdc:Bounds height="55.0" width="105.0" x="3090.0" y="913.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="REPORT_BILLING_INSTALLED" id="BPMNShape_REPORT_BILLING_INSTALLED">
+        <omgdc:Bounds height="55.0" width="105.0" x="3230.0" y="913.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="PTP_INFORM_SETUP" id="BPMNShape_PTP_INFORM_SETUP">
+        <omgdc:Bounds height="55.0" width="105.0" x="3370.0" y="913.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="endevent1" id="BPMNShape_endevent1">
+        <omgdc:Bounds height="35.0" width="35.0" x="3520.0" y="923.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="PTP_NEW_REQUEST_SEND_SMS" id="BPMNShape_PTP_NEW_REQUEST_SEND_SMS">
+        <omgdc:Bounds height="55.0" width="105.0" x="195.0" y="131.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="parallelgateway2" id="BPMNShape_parallelgateway2">
+        <omgdc:Bounds height="40.0" width="40.0" x="2682.0" y="707.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="PTP_SETUP_SEND_SMS" id="BPMNShape_PTP_SETUP_SEND_SMS">
+        <omgdc:Bounds height="55.0" width="105.0" x="2650.0" y="830.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="endevent2" id="BPMNShape_endevent2">
+        <omgdc:Bounds height="35.0" width="35.0" x="2685.0" y="913.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="parallelgateway3" id="BPMNShape_parallelgateway3">
+        <omgdc:Bounds height="40.0" width="40.0" x="1744.0" y="277.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="inclusivegateway2" id="BPMNShape_inclusivegateway2">
+        <omgdc:Bounds height="40.0" width="40.0" x="1744.0" y="370.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="startevent1" id="BPMNShape_startevent1">
+        <omgdc:Bounds height="35.0" width="35.0" x="230.0" y="60.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="inclusivegateway4" id="BPMNShape_inclusivegateway4">
+        <omgdc:Bounds height="40.0" width="40.0" x="940.0" y="277.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="textannotation1" id="BPMNShape_textannotation1">
+        <omgdc:Bounds height="50.0" width="100.0" x="70.0" y="80.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="textannotation2" id="BPMNShape_textannotation2">
+        <omgdc:Bounds height="50.0" width="100.0" x="70.0" y="200.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="textannotation3" id="BPMNShape_textannotation3">
+        <omgdc:Bounds height="50.0" width="100.0" x="661.0" y="228.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="textannotation4" id="BPMNShape_textannotation4">
+        <omgdc:Bounds height="50.0" width="100.0" x="70.0" y="423.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="textannotation5" id="BPMNShape_textannotation5">
+        <omgdc:Bounds height="50.0" width="100.0" x="70.0" y="530.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="textannotation6" id="BPMNShape_textannotation6">
+        <omgdc:Bounds height="50.0" width="100.0" x="70.0" y="620.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="textannotation7" id="BPMNShape_textannotation7">
+        <omgdc:Bounds height="50.0" width="100.0" x="70.0" y="710.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="textannotation8" id="BPMNShape_textannotation8">
+        <omgdc:Bounds height="50.0" width="100.0" x="70.0" y="880.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="flow2" id="BPMNEdge_flow2">
+        <omgdi:waypoint x="267.0" y="220.0"></omgdi:waypoint>
+        <omgdi:waypoint x="390.0" y="220.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="49.0" x="267.0" y="220.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow3" id="BPMNEdge_flow3">
+        <omgdi:waypoint x="247.0" y="240.0"></omgdi:waypoint>
+        <omgdi:waypoint x="247.0" y="297.0"></omgdi:waypoint>
+        <omgdi:waypoint x="390.0" y="297.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="67.0" x="251.0" y="280.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow4" id="BPMNEdge_flow4">
+        <omgdi:waypoint x="495.0" y="220.0"></omgdi:waypoint>
+        <omgdi:waypoint x="540.0" y="220.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow5" id="BPMNEdge_flow5">
+        <omgdi:waypoint x="645.0" y="220.0"></omgdi:waypoint>
+        <omgdi:waypoint x="690.0" y="221.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow6" id="BPMNEdge_flow6">
+        <omgdi:waypoint x="495.0" y="297.0"></omgdi:waypoint>
+        <omgdi:waypoint x="940.0" y="297.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow7" id="BPMNEdge_flow7">
+        <omgdi:waypoint x="730.0" y="221.0"></omgdi:waypoint>
+        <omgdi:waypoint x="820.0" y="221.0"></omgdi:waypoint>
+        <omgdi:waypoint x="960.0" y="277.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="18.0" x="762.0" y="207.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow8" id="BPMNEdge_flow8">
+        <omgdi:waypoint x="710.0" y="201.0"></omgdi:waypoint>
+        <omgdi:waypoint x="710.0" y="132.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="16.0" x="694.0" y="151.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow10" id="BPMNEdge_flow10">
+        <omgdi:waypoint x="763.0" y="104.0"></omgdi:waypoint>
+        <omgdi:waypoint x="800.0" y="104.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow11" id="BPMNEdge_flow11">
+        <omgdi:waypoint x="905.0" y="104.0"></omgdi:waypoint>
+        <omgdi:waypoint x="930.0" y="104.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow12" id="BPMNEdge_flow12">
+        <omgdi:waypoint x="960.0" y="277.0"></omgdi:waypoint>
+        <omgdi:waypoint x="960.0" y="204.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1012.0" y="201.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow13" id="BPMNEdge_flow13">
+        <omgdi:waypoint x="980.0" y="297.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1025.0" y="297.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow15" id="BPMNEdge_flow15">
+        <omgdi:waypoint x="1117.0" y="201.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1162.0" y="202.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow16" id="BPMNEdge_flow16">
+        <omgdi:waypoint x="1182.0" y="182.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1182.0" y="125.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="16.0" x="1162.0" y="162.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow17" id="BPMNEdge_flow17">
+        <omgdi:waypoint x="1235.0" y="97.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1280.0" y="97.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow18" id="BPMNEdge_flow18">
+        <omgdi:waypoint x="1385.0" y="97.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1430.0" y="97.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow19" id="BPMNEdge_flow19">
+        <omgdi:waypoint x="1130.0" y="297.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1532.0" y="297.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow20" id="BPMNEdge_flow20">
+        <omgdi:waypoint x="1552.0" y="277.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1552.0" y="125.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="16.0" x="1552.0" y="277.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow21" id="BPMNEdge_flow21">
+        <omgdi:waypoint x="1605.0" y="97.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1640.0" y="97.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow22" id="BPMNEdge_flow22">
+        <omgdi:waypoint x="1745.0" y="97.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1780.0" y="97.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow23" id="BPMNEdge_flow23">
+        <omgdi:waypoint x="1572.0" y="297.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1744.0" y="297.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="18.0" x="1643.0" y="302.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow24" id="BPMNEdge_flow24">
+        <omgdi:waypoint x="1202.0" y="202.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1764.0" y="201.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1764.0" y="277.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="18.0" x="1270.0" y="182.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow25" id="BPMNEdge_flow25">
+        <omgdi:waypoint x="1552.0" y="317.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1552.0" y="520.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="51.0" x="1555.0" y="380.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow26" id="BPMNEdge_flow26">
+        <omgdi:waypoint x="1500.0" y="547.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1424.0" y="547.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow27" id="BPMNEdge_flow27">
+        <omgdi:waypoint x="1404.0" y="527.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1403.0" y="475.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1544.0" y="475.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1552.0" y="520.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="58.0" x="1420.0" y="453.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow28" id="BPMNEdge_flow28">
+        <omgdi:waypoint x="1384.0" y="547.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1077.0" y="547.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1077.0" y="325.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow29" id="BPMNEdge_flow29">
+        <omgdi:waypoint x="1013.0" y="644.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1764.0" y="644.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1764.0" y="410.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow31" id="BPMNEdge_flow31">
+        <omgdi:waypoint x="1935.0" y="644.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1990.0" y="644.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow32" id="BPMNEdge_flow32">
+        <omgdi:waypoint x="2095.0" y="644.0"></omgdi:waypoint>
+        <omgdi:waypoint x="2160.0" y="644.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow33" id="BPMNEdge_flow33">
+        <omgdi:waypoint x="2265.0" y="644.0"></omgdi:waypoint>
+        <omgdi:waypoint x="2372.0" y="644.0"></omgdi:waypoint>
+        <omgdi:waypoint x="2372.0" y="700.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow34" id="BPMNEdge_flow34">
+        <omgdi:waypoint x="2425.0" y="727.0"></omgdi:waypoint>
+        <omgdi:waypoint x="2442.0" y="722.0"></omgdi:waypoint>
+        <omgdi:waypoint x="2442.0" y="132.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow35" id="BPMNEdge_flow35">
+        <omgdi:waypoint x="2495.0" y="104.0"></omgdi:waypoint>
+        <omgdi:waypoint x="2546.0" y="102.0"></omgdi:waypoint>
+        <omgdi:waypoint x="2546.0" y="700.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow36" id="BPMNEdge_flow36">
+        <omgdi:waypoint x="2599.0" y="727.0"></omgdi:waypoint>
+        <omgdi:waypoint x="2682.0" y="727.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow37" id="BPMNEdge_flow37">
+        <omgdi:waypoint x="2755.0" y="627.0"></omgdi:waypoint>
+        <omgdi:waypoint x="2810.0" y="627.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow38" id="BPMNEdge_flow38">
+        <omgdi:waypoint x="2850.0" y="627.0"></omgdi:waypoint>
+        <omgdi:waypoint x="2920.0" y="627.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="47.0" x="2870.0" y="605.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow39" id="BPMNEdge_flow39">
+        <omgdi:waypoint x="2972.0" y="600.0"></omgdi:waypoint>
+        <omgdi:waypoint x="2972.0" y="544.0"></omgdi:waypoint>
+        <omgdi:waypoint x="2702.0" y="544.0"></omgdi:waypoint>
+        <omgdi:waypoint x="2702.0" y="600.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow40" id="BPMNEdge_flow40">
+        <omgdi:waypoint x="2830.0" y="647.0"></omgdi:waypoint>
+        <omgdi:waypoint x="2830.0" y="940.0"></omgdi:waypoint>
+        <omgdi:waypoint x="2970.0" y="940.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="44.0" x="2830.0" y="647.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow44" id="BPMNEdge_flow44">
+        <omgdi:waypoint x="3195.0" y="940.0"></omgdi:waypoint>
+        <omgdi:waypoint x="3230.0" y="940.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow46" id="BPMNEdge_flow46">
+        <omgdi:waypoint x="3335.0" y="940.0"></omgdi:waypoint>
+        <omgdi:waypoint x="3370.0" y="940.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow47" id="BPMNEdge_flow47">
+        <omgdi:waypoint x="3475.0" y="940.0"></omgdi:waypoint>
+        <omgdi:waypoint x="3520.0" y="940.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow48" id="BPMNEdge_flow48">
+        <omgdi:waypoint x="3010.0" y="940.0"></omgdi:waypoint>
+        <omgdi:waypoint x="3090.0" y="940.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="35.0" x="3010.0" y="940.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow49" id="BPMNEdge_flow49">
+        <omgdi:waypoint x="2990.0" y="960.0"></omgdi:waypoint>
+        <omgdi:waypoint x="2990.0" y="1010.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow50" id="BPMNEdge_flow50">
+        <omgdi:waypoint x="2990.0" y="1010.0"></omgdi:waypoint>
+        <omgdi:waypoint x="2927.0" y="978.0"></omgdi:waypoint>
+        <omgdi:waypoint x="2990.0" y="960.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow51" id="BPMNEdge_flow51">
+        <omgdi:waypoint x="247.0" y="186.0"></omgdi:waypoint>
+        <omgdi:waypoint x="247.0" y="200.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow52" id="BPMNEdge_flow52">
+        <omgdi:waypoint x="2702.0" y="707.0"></omgdi:waypoint>
+        <omgdi:waypoint x="2702.0" y="655.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow53" id="BPMNEdge_flow53">
+        <omgdi:waypoint x="2702.0" y="747.0"></omgdi:waypoint>
+        <omgdi:waypoint x="2702.0" y="830.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow54" id="BPMNEdge_flow54">
+        <omgdi:waypoint x="2702.0" y="885.0"></omgdi:waypoint>
+        <omgdi:waypoint x="2702.0" y="913.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow55" id="BPMNEdge_flow55">
+        <omgdi:waypoint x="1764.0" y="317.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1764.0" y="370.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow56" id="BPMNEdge_flow56">
+        <omgdi:waypoint x="1784.0" y="390.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1882.0" y="389.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1882.0" y="617.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow58" id="BPMNEdge_flow58">
+        <omgdi:waypoint x="247.0" y="95.0"></omgdi:waypoint>
+        <omgdi:waypoint x="247.0" y="131.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow59" id="BPMNEdge_flow59">
+        <omgdi:waypoint x="960.0" y="317.0"></omgdi:waypoint>
+        <omgdi:waypoint x="960.0" y="617.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="56.0" width="100.0" x="847.0" y="390.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>
